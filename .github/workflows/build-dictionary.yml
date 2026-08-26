@@ -23,19 +23,35 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Print execution context
+        run: |
+          echo "=== GITHUB ACTIONS RUNNER CONTEXT ==="
+          echo "Run ID: ${{ github.run_id }}"
+          echo "Run Number: ${{ github.run_number }}"
+          echo "Run Attempt: ${{ github.run_attempt }}"
+          echo "Commit SHA: ${{ github.sha }}"
+          echo "Run URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
       - name: Grant execute permission for scripts
         run: |
           chmod +x scripts/merge_and_build_es.sh
           chmod +x scripts/merge_and_build_es.py
 
       - name: Run dictionary merge and build pipeline
+        env:
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
+          GITHUB_RUN_ATTEMPT: ${{ github.run_attempt }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           ./scripts/merge_and_build_es.sh
 
       - name: Verify build outputs
         run: |
           echo "Verificando artefactos generados..."
-          for file in "main_es.dict" "main_es.combined" "build.log" "merge_report.md"; do
+          for file in "main_es.dict" "main_es_PE.dict" "main_es.combined" "build.log" "merge_report.md"; do
             if [ ! -s "$file" ]; then
               echo "Error: El archivo $file no existe o está vacío."
               exit 1
@@ -43,10 +59,27 @@ jobs:
             echo "✔ $file existe ($(ls -lh "$file" | awk '{print $5}'))"
           done
 
+      - name: Append execution metadata to build.log
+        if: always()
+        run: |
+          echo "" >> build.log
+          echo "=== GITHUB ACTIONS TRACEABILITY ===" >> build.log
+          echo "RUN_ID=${{ github.run_id }}" >> build.log
+          echo "RUN_NUMBER=${{ github.run_number }}" >> build.log
+          echo "RUN_ATTEMPT=${{ github.run_attempt }}" >> build.log
+          echo "COMMIT_SHA=${{ github.sha }}" >> build.log
+          echo "RUN_URL=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> build.log
+
       - name: Publish build report summary
         if: always() && hashFiles('merge_report.md') != ''
         run: |
           cat merge_report.md >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🏷️ Resumen de Trazabilidad CI/CD" >> $GITHUB_STEP_SUMMARY
+          echo "- **Run ID:** \`${{ github.run_id }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Run Number:** \`#${{ github.run_number }}\` (Intento: \`${{ github.run_attempt }}\`)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit SHA:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Run URL:** [${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload Package Artifact
         uses: actions/upload-artifact@v4

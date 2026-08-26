@@ -438,6 +438,15 @@ def generate_report(source_stats, lexicon_size, dict_size, makedict_output):
     total_raw_entries = sum(s["raw_entries"] for s in source_stats)
     total_distinct_instances = sum(s["distinct_in_file"] for s in source_stats)
     total_duplicate_instances = total_distinct_instances - lexicon_size
+
+    # GitHub Actions Metadata (if present)
+    run_id = os.environ.get("GITHUB_RUN_ID", "Local / CI Workspace")
+    run_number = os.environ.get("GITHUB_RUN_NUMBER", "1")
+    run_attempt = os.environ.get("GITHUB_RUN_ATTEMPT", "1")
+    commit_sha = os.environ.get("GITHUB_SHA", "HEAD (Uncommitted)")
+    server_url = os.environ.get("GITHUB_SERVER_URL", "https://github.com")
+    repo = os.environ.get("GITHUB_REPOSITORY", "")
+    run_url = f"{server_url}/{repo}/actions/runs/{run_id}" if repo and run_id != "Local / CI Workspace" else "Local execution"
     
     report_lines = [
         "# 📚 AOSP / FUTO Dictionary Build & Lexical Audit Report",
@@ -447,6 +456,12 @@ def generate_report(source_stats, lexicon_size, dict_size, makedict_output):
         f"**Total de Palabras Únicas Consolidadas (Léxico Maestro):** **`{lexicon_size:,}`**  ",
         f"**Total de Entradas Brutas Procesadas:** `{total_raw_entries:,}`  ",
         f"**Entradas Léxicas Duplicadas Consolidadas:** `{total_duplicate_instances:,}` (Resueltas conservando la frecuencia más alta `max(f)`)  ",
+        "",
+        "### 🏷️ Trazabilidad de GitHub Actions:",
+        f"- **GitHub Run ID:** `{run_id}`",
+        f"- **GitHub Run Number:** `#{run_number}` (Intento: `{run_attempt}`)",
+        f"- **Commit SHA:** `{commit_sha}`",
+        f"- **Run URL:** [{run_url}]({run_url})" if run_url.startswith("http") else f"- **Run URL:** `{run_url}`",
         "",
         "---",
         "",

@@ -1,10 +1,16 @@
 # 📚 AOSP / FUTO Dictionary Build & Lexical Audit Report
-**Fecha y Hora:** `2026-08-26 22:55:16 UTC`  
+**Fecha y Hora:** `2026-08-26 23:10:58 UTC`  
 **Diccionario Binario Final:** `main_es.dict`  
-**Tamaño del Binario Final:** `6.57 MB` (6,891,610 bytes)  
-**Total de Palabras Únicas Consolidadas (Léxico Maestro):** **`1,135,428`**  
-**Total de Entradas Brutas Procesadas:** `2,193,239`  
-**Entradas Léxicas Duplicadas Consolidadas:** `1,050,903` (Resueltas conservando la frecuencia más alta `max(f)`)  
+**Tamaño del Binario Final:** `6.29 MB` (6,599,846 bytes)  
+**Total de Palabras Únicas Consolidadas (Léxico Maestro):** **`1,095,205`**  
+**Total de Entradas Brutas Procesadas:** `2,112,793`  
+**Entradas Léxicas Duplicadas Consolidadas:** `1,010,680` (Resueltas conservando la frecuencia más alta `max(f)`)  
+
+### 🏷️ Trazabilidad de GitHub Actions:
+- **GitHub Run ID:** `Local / CI Workspace`
+- **GitHub Run Number:** `#1` (Intento: `1`)
+- **Commit SHA:** `HEAD (Uncommitted)`
+- **Run URL:** `Local execution`
 
 ---
 
@@ -17,8 +23,8 @@
 | `es_PE.txt` | TXT | 698.6 KB | 58,442 | 56,027 | +0 | 56,027 |
 | `es_PE_wordlist.combined` | COMBINED | 1.16 MB | 56,027 | 56,027 | +0 | 56,027 |
 | `main_es (1).dict` | DICT | 1.31 MB | 235,130 | 235,130 | +205,834 | 29,296 |
-| `main_es.dict` | DICT | 6.96 MB | 858,326 | 858,326 | +0 | 858,326 |
-| `main_es_PE.dict` | DICT | 6.96 MB | 858,326 | 858,326 | +0 | 858,326 |
+| `main_es.dict` | DICT | 6.57 MB | 818,103 | 818,103 | +0 | 818,103 |
+| `main_es_PE.dict` | DICT | 6.57 MB | 818,103 | 818,103 | +0 | 818,103 |
 | `test.combined` | COMBINED | 0.2 KB | 5 | 5 | +2 | 3 |
 | `test.dict` | DICT | 0.1 KB | 1 | 1 | +0 | 1 |
 | `test1.combined` | COMBINED | 0.1 KB | 2 | 2 | +0 | 2 |
@@ -38,20 +44,20 @@
 ## ⚙️ 2. Métricas del Árbol Trie (Compilador PtNode)
 ```text
 Flattening the tree...
-Counted nodes : 1390589
+Counted nodes : 1334321
 Computing addresses...
-Compressing the array addresses. Original size : 10417198
-(Recursively seen size : 10417198)
+Compressing the array addresses. Original size : 9979584
+(Recursively seen size : 9979584)
 Compression complete in 5 passes.
-After address compression : 6891482
+After address compression : 6599718
 Checking PtNode array...
 Writing file...
 Statistics:
-  Total file size 6891482
-  582201 node arrays
-  1390589 PtNodes (2.3885033 PtNodes per node)
+  Total file size 6599718
+  562000 node arrays
+  1334321 PtNodes (2.3742366 PtNodes per node)
   First terminal at 0
-  Last terminal at 6891470
+  Last terminal at 6599706
   PtNode stats : max = 64
 Done
 ```
