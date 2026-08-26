@@ -1,0 +1,6 @@
+{
+  "name": "Mi Diccionario - AOSP & Lexicon Builder",
+  "description": "Explorador interactivo, editor de léxicos y constructor de diccionarios AOSP/Trie para español peruano (es_PE) y general.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
