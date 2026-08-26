@@ -1,8 +1,15 @@
-name: Build Dictionary
+name: Build & Release Dictionary
 
 on:
   push:
+    branches:
+      - '**'
+    tags:
+      - 'v*'
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -30,6 +37,8 @@ jobs:
           echo "Run Number: ${{ github.run_number }}"
           echo "Run Attempt: ${{ github.run_attempt }}"
           echo "Commit SHA: ${{ github.sha }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Ref Name: ${{ github.ref_name }}"
           echo "Run URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
       - name: Grant execute permission for scripts
@@ -50,13 +59,13 @@ jobs:
 
       - name: Verify build outputs
         run: |
-          echo "Verificando artefactos generados..."
+          echo "Verificando integridad de artefactos generados..."
           for file in "main_es.dict" "main_es_PE.dict" "main_es.combined" "build.log" "merge_report.md"; do
             if [ ! -s "$file" ]; then
-              echo "Error: El archivo $file no existe o está vacío."
+              echo "❌ Error crítico: El archivo $file no existe o está vacío. Abortando pipeline."
               exit 1
             fi
-            echo "✔ $file existe ($(ls -lh "$file" | awk '{print $5}'))"
+            echo "✔ $file generado correctamente ($(ls -lh "$file" | awk '{print $5}'))"
           done
 
       - name: Append execution metadata to build.log
@@ -68,6 +77,7 @@ jobs:
           echo "RUN_NUMBER=${{ github.run_number }}" >> build.log
           echo "RUN_ATTEMPT=${{ github.run_attempt }}" >> build.log
           echo "COMMIT_SHA=${{ github.sha }}" >> build.log
+          echo "REF_NAME=${{ github.ref_name }}" >> build.log
           echo "RUN_URL=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> build.log
 
       - name: Publish build report summary
@@ -79,6 +89,7 @@ jobs:
           echo "- **Run ID:** \`${{ github.run_id }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- **Run Number:** \`#${{ github.run_number }}\` (Intento: \`${{ github.run_attempt }}\`)" >> $GITHUB_STEP_SUMMARY
           echo "- **Commit SHA:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Ref:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- **Run URL:** [${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload Package Artifact
@@ -93,3 +104,23 @@ jobs:
             merge_report.md
           if-no-files-found: error
           retention-days: 90
+
+      - name: Create and Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Dictionary Release ${{ github.ref_name }}"
+          tag_name: ${{ github.ref_name }}
+          body_path: merge_report.md
+          files: |
+            main_es.dict
+            main_es_PE.dict
+            main_es.combined
+            merge_report.md
+            build.log
+          fail_on_unmatched_files: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
