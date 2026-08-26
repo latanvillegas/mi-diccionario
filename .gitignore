@@ -1,0 +1,12 @@
+# Logs y temporales de compilación interna
+node_modules/
+dist/
+*.class
+__pycache__/
+*.pyc
+temp_*.tsv
+.DS_Store
+
+# Archivos de entorno
+.env
+.env.local

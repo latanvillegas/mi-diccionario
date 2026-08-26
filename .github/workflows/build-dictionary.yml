@@ -1,0 +1,62 @@
+name: Build Dictionary
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Python 3
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Grant execute permission for scripts
+        run: |
+          chmod +x scripts/merge_and_build_es.sh
+          chmod +x scripts/merge_and_build_es.py
+
+      - name: Run dictionary merge and build pipeline
+        run: |
+          ./scripts/merge_and_build_es.sh
+
+      - name: Verify build outputs
+        run: |
+          echo "Verificando artefactos generados..."
+          for file in "main_es.dict" "main_es.combined" "build.log" "merge_report.md"; do
+            if [ ! -s "$file" ]; then
+              echo "Error: El archivo $file no existe o está vacío."
+              exit 1
+            fi
+            echo "✔ $file existe ($(ls -lh "$file" | awk '{print $5}'))"
+          done
+
+      - name: Publish build report summary
+        if: always() && hashFiles('merge_report.md') != ''
+        run: |
+          cat merge_report.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload Package Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Package
+          path: |
+            main_es.dict
+            main_es_PE.dict
+            main_es.combined
+            build.log
+            merge_report.md
+          if-no-files-found: error
+          retention-days: 90
