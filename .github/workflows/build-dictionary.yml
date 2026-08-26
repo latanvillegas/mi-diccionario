@@ -57,10 +57,10 @@ jobs:
         run: |
           ./scripts/merge_and_build_es.sh
 
-      - name: Verify build outputs
+      - name: Verify single dictionary build outputs
         run: |
-          echo "Verificando integridad de artefactos generados..."
-          for file in "main_es.dict" "main_es_PE.dict" "main_es.combined" "build.log" "merge_report.md"; do
+          echo "Verificando integridad del único diccionario final generado..."
+          for file in "main_es.dict" "main_es.combined" "build.log" "merge_report.md"; do
             if [ ! -s "$file" ]; then
               echo "❌ Error crítico: El archivo $file no existe o está vacío. Abortando pipeline."
               exit 1
@@ -98,7 +98,6 @@ jobs:
           name: Package
           path: |
             main_es.dict
-            main_es_PE.dict
             main_es.combined
             build.log
             merge_report.md
@@ -114,7 +113,6 @@ jobs:
           body_path: merge_report.md
           files: |
             main_es.dict
-            main_es_PE.dict
             main_es.combined
             merge_report.md
             build.log
@@ -123,4 +121,3 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-

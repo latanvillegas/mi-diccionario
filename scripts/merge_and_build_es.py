@@ -4,7 +4,8 @@ Merge and Build AOSP/FUTO Consolidated Dictionary
 Automated script for CI/CD and local development.
 Performs independent source ingestion, individual file word extraction,
 cross-source duplicate tracking/auditing, highest-frequency collision resolution,
-and final binary PtNode Trie compilation.
+and final unified binary PtNode Trie compilation.
+Generates ONLY main_es.dict and main_es.combined with locale 'es'.
 """
 
 import os
@@ -15,6 +16,7 @@ import shutil
 import urllib.request
 import subprocess
 import unicodedata
+import hashlib
 import re
 from pathlib import Path
 
@@ -24,9 +26,10 @@ SCRIPTS_DIR = Path(__file__).resolve().parent
 DICTTOOL_JAR = REPO_ROOT / "dicttool_aosp.jar"
 LOG_FILE = REPO_ROOT / "build.log"
 REPORT_FILE = REPO_ROOT / "merge_report.md"
-COMBINED_OUT = REPO_ROOT / "main_es.combined"
-DICT_OUT = REPO_ROOT / "main_es.dict"
-DICT_PE_OUT = REPO_ROOT / "main_es_PE.dict"
+
+# Single Final Output
+MASTER_COMBINED_OUT = REPO_ROOT / "main_es.combined"
+MASTER_DICT_OUT = REPO_ROOT / "main_es.dict"
 
 DICTTOOL_URL = "https://github.com/Helium314/HeliBoard/releases/download/v2.1/dicttool_aosp.jar"
 MAX_WORD_LENGTH = 47
@@ -253,10 +256,8 @@ def parse_line_entry(line):
             except ValueError:
                 freq = 100
     elif "/" in line and not line.startswith("http"):
-        # Hunspell format: palabra/banderas
         word = line.split("/")[0].strip()
     else:
-        # Just word or word with whitespace and number
         subparts = line.split()
         if len(subparts) == 2 and subparts[1].isdigit():
             word = subparts[0].strip()
@@ -267,9 +268,7 @@ def parse_line_entry(line):
     return word, freq
 
 def extract_words_from_file(file_path, is_dict, is_gz, has_java_extractor):
-    """
-    Extracts all raw entries from a single file and returns a list of (normalized_word, freq).
-    """
+    """Extracts all raw entries from a single file and returns a list of (normalized_word, freq)."""
     entries = []
     if is_dict:
         if not has_java_extractor:
@@ -299,18 +298,14 @@ def extract_words_from_file(file_path, is_dict, is_gz, has_java_extractor):
 
 def process_all_sources():
     """
-    Scans every single dictionary source independently, preserving all files.
-    Calculates per-file raw entries, file-distinct words, cross-source duplicates,
-    and merges into the master lexicon resolving frequencies with max(f).
+    Scans every single dictionary source independently.
+    Merges all words into a single master dictionary lexicon resolving collisions with max(f).
     """
     master_lexicon = {}  # word -> max_freq
     file_word_sets = {}  # file_path -> dict(word -> max_freq in that file)
     source_stats = []
 
-    # Files to exclude from input scanning (generated outputs or dev artifacts)
     excluded_names = {
-        "main_es.combined",
-        "main_es_PE.combined",
         "output.dict",
         "test_out.dict",
         "package.json",
@@ -320,10 +315,8 @@ def process_all_sources():
         "tailwind.config.js"
     }
 
-    # Discover candidate files
     all_files = []
     for root, dirs, files in os.walk(REPO_ROOT):
-        # Skip hidden dirs, dist, and node_modules
         dirs[:] = [d for d in dirs if not d.startswith(".") and d not in ["node_modules", "dist"]]
         for file in files:
             p = Path(root) / file
@@ -334,7 +327,6 @@ def process_all_sources():
     all_files.sort()
     has_java_extractor = compile_java_extractor()
 
-    # Step 1: Ingest every source independently
     for file_path in all_files:
         ext = file_path.suffix.lower()
         full_ext = "".join(file_path.suffixes).lower()
@@ -362,20 +354,15 @@ def process_all_sources():
             "words": file_words
         }
 
-    # Step 2: Global cross-source deduplication analysis
-    # For each file, determine how many unique words it has, and how many overlap with other files
     for file_path, data in file_word_sets.items():
         words_in_file = set(data["words"].keys())
         
-        # Words present in OTHER files
         words_in_other_files = set()
         for other_path, other_data in file_word_sets.items():
             if other_path != file_path:
                 words_in_other_files.update(other_data["words"].keys())
 
-        # Words exclusively contributed only by this file
         unique_to_this_file = words_in_file - words_in_other_files
-        # Duplicate/overlapping words present in this file AND in at least one other source
         duplicate_words = words_in_file & words_in_other_files
 
         source_stats.append({
@@ -389,26 +376,26 @@ def process_all_sources():
             "duplicated_words": len(duplicate_words)
         })
 
-        # Update Master Lexicon (merging with highest frequency)
         for w, f in data["words"].items():
             if w not in master_lexicon or f > master_lexicon[w]:
                 master_lexicon[w] = f
 
     return master_lexicon, source_stats
 
-def write_combined_file(lexicon, output_path, locale="es", description="Spanish Consolidated Modern AOSP/FUTO Dictionary"):
-    """Write intermediate .combined file in AOSP format."""
+def write_combined_file(lexicon, output_path):
+    """Write the single master .combined file using the exact requested Spanish header."""
     epoch = int(time.time())
-    logger.log(f"Writing intermediate {output_path.name} with {len(lexicon)} words...")
+    logger.log(f"Writing single master {output_path.name} with {len(lexicon)} words...")
     with open(output_path, "w", encoding="utf-8") as f:
-        f.write(f"dictionary=main:{locale},locale={locale},description={description},date={epoch},version=1\n")
+        # Pattern requested: dictionary=main:es,locale=es,description=Spanish merged dictionary,date=UNIX_TIMESTAMP,version=1
+        f.write(f"dictionary=main:es,locale=es,description=Spanish merged dictionary,date={epoch},version=1\n")
         for word in sorted(lexicon.keys()):
             f.write(f" word={word},f={lexicon[word]}\n")
-    logger.log(f"Intermediate combined file written: {output_path.stat().st_size} bytes")
+    logger.log(f"Master combined file written: {output_path.stat().st_size} bytes")
 
 def compile_binary_dict(combined_path, dict_path):
-    """Compile binary .dict file using dicttool_aosp.jar."""
-    logger.log(f"Compiling binary dictionary {dict_path.name} from {combined_path.name}...")
+    """Compile single master binary main_es.dict using dicttool_aosp.jar."""
+    logger.log(f"Compiling single master binary dictionary {dict_path.name} from {combined_path.name}...")
     cmd = [
         "java",
         "-Xmx4g",
@@ -428,12 +415,22 @@ def compile_binary_dict(combined_path, dict_path):
     if res.returncode != 0 or not dict_path.exists() or dict_path.stat().st_size == 0:
         raise RuntimeError(f"makedict failed with return code {res.returncode}")
         
-    logger.log(f"Binary dictionary successfully compiled: {dict_path.stat().st_size} bytes")
+    logger.log(f"Master binary dictionary successfully compiled: {dict_path.stat().st_size} bytes")
     return res.stdout
 
-def generate_report(source_stats, lexicon_size, dict_size, makedict_output):
-    """Generate comprehensive Markdown audit report for artifacts and step summary."""
+def compute_sha256(file_path):
+    """Compute SHA-256 hash of a file."""
+    h = hashlib.sha256()
+    with open(file_path, "rb") as f:
+        while chunk := f.read(65536):
+            h.update(chunk)
+    return h.hexdigest()
+
+def generate_report(source_stats, lexicon_size, master_dict_path, makedict_output):
+    """Generate comprehensive Markdown audit report for the single master dictionary."""
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())
+    dict_size = master_dict_path.stat().st_size
+    master_sha = compute_sha256(master_dict_path)
     
     total_raw_entries = sum(s["raw_entries"] for s in source_stats)
     total_distinct_instances = sum(s["distinct_in_file"] for s in source_stats)
@@ -449,11 +446,14 @@ def generate_report(source_stats, lexicon_size, dict_size, makedict_output):
     run_url = f"{server_url}/{repo}/actions/runs/{run_id}" if repo and run_id != "Local / CI Workspace" else "Local execution"
     
     report_lines = [
-        "# 📚 AOSP / FUTO Dictionary Build & Lexical Audit Report",
+        "# 📚 AOSP / FUTO Consolidated Single Master Dictionary Report",
         f"**Fecha y Hora:** `{timestamp}`  ",
-        f"**Diccionario Binario Final:** `main_es.dict`  ",
-        f"**Tamaño del Binario Final:** `{dict_size / (1024*1024):.2f} MB` ({dict_size:,} bytes)  ",
-        f"**Total de Palabras Únicas Consolidadas (Léxico Maestro):** **`{lexicon_size:,}`**  ",
+        f"**Único Diccionario Final (Master Binary):** **`{master_dict_path.name}`**  ",
+        f"**Única Fuente Intermedia Maestra:** **`{MASTER_COMBINED_OUT.name}`**  ",
+        f"**Locale Configurado:** `es` (Español)  ",
+        f"**Tamaño del Binario Final (`main_es.dict`):** `{dict_size / (1024*1024):.2f} MB` ({dict_size:,} bytes)  ",
+        f"**SHA-256 de `main_es.dict`:** `{master_sha}`  ",
+        f"**Total de Palabras Únicas Consolidadas en el Diccionario Final:** **`{lexicon_size:,}`**  ",
         f"**Total de Entradas Brutas Procesadas:** `{total_raw_entries:,}`  ",
         f"**Entradas Léxicas Duplicadas Consolidadas:** `{total_duplicate_instances:,}` (Resueltas conservando la frecuencia más alta `max(f)`)  ",
         "",
@@ -465,8 +465,8 @@ def generate_report(source_stats, lexicon_size, dict_size, makedict_output):
         "",
         "---",
         "",
-        "## 🔍 1. Auditoría Detallada de Fuentes Procesadas",
-        "> **Criterio de Auditoría:** Todas las fuentes se conservan y procesan de forma 100% independiente sin descarte por similitud de nombres. La deduplicación se aplica estrictamente sobre las entradas léxicas repetidas.",
+        "## 🔍 1. Auditoría de Fuentes Fusionadas en el Diccionario Único",
+        "> **Criterio de Fusión:** Todas las fuentes del repositorio se ingirieron de forma 100% independiente y se consolidaron en un solo léxico maestro. Las palabras duplicadas se resolvieron conservando la frecuencia más alta `max(f)`.",
         "",
         "| Archivo Fuente | Formato | Tamaño | Entradas Extraídas | Palabras Distintas | Aportes Exclusivos | Palabras Duplicadas (Solapadas) |",
         "| :--- | :---: | :---: | :---: | :---: | :---: | :---: |"
@@ -488,7 +488,7 @@ def generate_report(source_stats, lexicon_size, dict_size, makedict_output):
         "",
         "---",
         "",
-        "## ⚙️ 2. Métricas del Árbol Trie (Compilador PtNode)",
+        "## ⚙️ 2. Métricas del Árbol PtNode Trie (`main_es.dict`)",
         "```text",
         makedict_output.strip() if makedict_output else "No makedict log",
         "```",
@@ -496,7 +496,8 @@ def generate_report(source_stats, lexicon_size, dict_size, makedict_output):
         "---",
         "",
         "## 🛡️ 3. Validación de Cumplimiento Técnico",
-        "- [x] **Preservación Total de Fuentes:** Ningún archivo fuente fue omitido, renombrado ni borrado.",
+        "- [x] **Un Solo Diccionario Final:** Generado exclusivamente `main_es.dict`.",
+        "- [x] **Sin Variantes Regionales Separadas:** Configurado con locale unificado `es`.",
         "- [x] **Deduplicación Léxica:** Cada palabra repetida se consolidó en una única entrada en `main_es.combined`.",
         "- [x] **Resolución de Frecuencia:** Para cada colisión léxica se aplicó la frecuencia máxima ponderada (`f = max(f1, f2, ...)` en rango 1-255).",
         "- [x] **Normalización Unicode:** Estándar NFC completo en caracteres hispanos (`á, é, í, ó, ú, ü, ñ`).",
@@ -508,8 +509,18 @@ def generate_report(source_stats, lexicon_size, dict_size, makedict_output):
         f.write("\n".join(report_lines) + "\n")
     logger.log(f"Report generated: {REPORT_FILE.name}")
 
+def clean_old_regional_artifacts():
+    """Remove old main_es_PE.* artifacts so only main_es.* exists."""
+    for p in [REPO_ROOT / "main_es_PE.dict", REPO_ROOT / "main_es_PE.combined"]:
+        if p.exists():
+            try:
+                p.unlink()
+                logger.log(f"Removed legacy regional artifact: {p.name}")
+            except Exception:
+                pass
+
 def main():
-    logger.log("=== STARTING AOSP/FUTO DICTIONARY MERGE & BUILD PIPELINE ===")
+    logger.log("=== STARTING SINGLE MASTER AOSP/FUTO DICTIONARY (main_es.dict) PIPELINE ===")
     start_time = time.time()
     
     try:
@@ -519,18 +530,16 @@ def main():
         if not lexicon:
             raise ValueError("No valid words were extracted from the sources!")
             
-        # Write main_es.combined
-        write_combined_file(lexicon, COMBINED_OUT, locale="es", description="Spanish Consolidated Modern AOSP/FUTO Dictionary")
-        
-        # Compile main_es.dict
-        makedict_out = compile_binary_dict(COMBINED_OUT, DICT_OUT)
-        
-        # Also copy / generate main_es_PE.dict if needed as an alias
-        shutil.copy2(DICT_OUT, DICT_PE_OUT)
-        logger.log(f"Created Peru regionalized alias: {DICT_PE_OUT.name}")
+        clean_old_regional_artifacts()
 
-        # Generate audit report
-        generate_report(source_stats, len(lexicon), DICT_OUT.stat().st_size, makedict_out)
+        # Step 1: Write SINGLE master intermediate .combined file (locale: es)
+        write_combined_file(lexicon, MASTER_COMBINED_OUT)
+        
+        # Step 2: Compile SINGLE master binary dictionary (main_es.dict)
+        makedict_out = compile_binary_dict(MASTER_COMBINED_OUT, MASTER_DICT_OUT)
+
+        # Step 3: Generate audit report
+        generate_report(source_stats, len(lexicon), MASTER_DICT_OUT, makedict_out)
         
         elapsed = time.time() - start_time
         logger.log(f"=== PIPELINE COMPLETED SUCCESSFULLY IN {elapsed:.2f}s ===")

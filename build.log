@@ -1,43 +1,46 @@
-[2026-08-26 23:10:37] === STARTING AOSP/FUTO DICTIONARY MERGE & BUILD PIPELINE ===
-[2026-08-26 23:10:37] Found dicttool_aosp.jar (237920 bytes)
-[2026-08-26 23:10:37] Compiling DictBinaryExtractor.java...
-[2026-08-26 23:10:38] DictBinaryExtractor compiled successfully.
-[2026-08-26 23:10:38] Ingesting source independently: es.dic (835300 bytes)
-[2026-08-26 23:10:38] Ingesting source independently: es_PE.txt (715401 bytes)
-[2026-08-26 23:10:38] Ingesting source independently: es_PE_wordlist.combined (1216174 bytes)
-[2026-08-26 23:10:38] Ingesting source independently: main_es (1).dict (1377071 bytes)
-[2026-08-26 23:10:39] Ingesting source independently: main_es.dict (6891610 bytes)
-[2026-08-26 23:10:43] Ingesting source independently: main_es_PE.dict (6891610 bytes)
-[2026-08-26 23:10:46] Ingesting source independently: test.combined (183 bytes)
-[2026-08-26 23:10:46] Ingesting source independently: test.dict (146 bytes)
-[2026-08-26 23:10:46] Ingesting source independently: test1.combined (122 bytes)
-[2026-08-26 23:10:46] Ingesting source independently: test1.dict (115 bytes)
-[2026-08-26 23:10:46] Ingesting source independently: test2.combined (112 bytes)
-[2026-08-26 23:10:46] Ingesting source independently: test2.dict (101 bytes)
-[2026-08-26 23:10:47] Ingesting source independently: words_input.txt (999585 bytes)
-[2026-08-26 23:10:52] Writing intermediate main_es.combined with 1095205 words...
-[2026-08-26 23:10:53] Intermediate combined file written: 46206409 bytes
-[2026-08-26 23:10:53] Compiling binary dictionary main_es.dict from main_es.combined...
-[2026-08-26 23:10:58] makedict output:
+[2026-08-26 23:31:46] === STARTING SINGLE MASTER AOSP/FUTO DICTIONARY (main_es.dict) PIPELINE ===
+[2026-08-26 23:31:46] Found dicttool_aosp.jar (237920 bytes)
+[2026-08-26 23:31:46] Compiling DictBinaryExtractor.java...
+[2026-08-26 23:31:47] DictBinaryExtractor compiled successfully.
+[2026-08-26 23:31:47] Ingesting source independently: es.dic (835300 bytes)
+[2026-08-26 23:31:47] Ingesting source independently: es_PE.txt (715401 bytes)
+[2026-08-26 23:31:47] Ingesting source independently: es_PE_wordlist.combined (1216174 bytes)
+[2026-08-26 23:31:47] Ingesting source independently: main_es (1).dict (1377071 bytes)
+[2026-08-26 23:31:49] Ingesting source independently: main_es.combined (46343518 bytes)
+[2026-08-26 23:31:52] Ingesting source independently: main_es.dict (6614034 bytes)
+[2026-08-26 23:31:53] Ingesting source independently: main_es_PE.combined (46343518 bytes)
+[2026-08-26 23:31:56] Ingesting source independently: main_es_PE.dict (6614034 bytes)
+[2026-08-26 23:31:56] Ingesting source independently: test.combined (183 bytes)
+[2026-08-26 23:31:56] Ingesting source independently: test.dict (146 bytes)
+[2026-08-26 23:31:56] Ingesting source independently: test1.combined (122 bytes)
+[2026-08-26 23:31:56] Ingesting source independently: test1.dict (115 bytes)
+[2026-08-26 23:31:57] Ingesting source independently: test2.combined (112 bytes)
+[2026-08-26 23:31:57] Ingesting source independently: test2.dict (101 bytes)
+[2026-08-26 23:31:57] Ingesting source independently: words_input.txt (999585 bytes)
+[2026-08-26 23:32:04] Removed legacy regional artifact: main_es_PE.dict
+[2026-08-26 23:32:04] Removed legacy regional artifact: main_es_PE.combined
+[2026-08-26 23:32:04] Writing single master main_es.combined with 1097942 words...
+[2026-08-26 23:32:05] Master combined file written: 46343482 bytes
+[2026-08-26 23:32:05] Compiling single master binary dictionary main_es.dict from main_es.combined...
+[2026-08-26 23:32:11] makedict output:
 Flattening the tree...
-Counted nodes : 1334321
+Counted nodes : 1337091
 Computing addresses...
-Compressing the array addresses. Original size : 9979584
-(Recursively seen size : 9979584)
+Compressing the array addresses. Original size : 10000941
+(Recursively seen size : 10000941)
 Compression complete in 5 passes.
-After address compression : 6599718
+After address compression : 6613893
 Checking PtNode array...
 Writing file...
 Statistics:
-  Total file size 6599718
-  562000 node arrays
-  1334321 PtNodes (2.3742366 PtNodes per node)
+  Total file size 6613893
+  562999 node arrays
+  1337091 PtNodes (2.3749437 PtNodes per node)
   First terminal at 0
-  Last terminal at 6599706
+  Last terminal at 6613881
   PtNode stats : max = 64
 Done
 
-[2026-08-26 23:10:58] Binary dictionary successfully compiled: 6599846 bytes
-[2026-08-26 23:10:58] Created Peru regionalized alias: main_es_PE.dict
-[2026-08-26 23:10:58] Report generated: merge_report.md
-[2026-08-26 23:10:58] === PIPELINE COMPLETED SUCCESSFULLY IN 21.58s ===
+[2026-08-26 23:32:11] Master binary dictionary successfully compiled: 6613998 bytes
+[2026-08-26 23:32:11] Report generated: merge_report.md
+[2026-08-26 23:32:11] === PIPELINE COMPLETED SUCCESSFULLY IN 24.39s ===
