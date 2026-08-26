@@ -1,56 +1,43 @@
-[2026-08-26 22:29:32] === STARTING AOSP/FUTO DICTIONARY MERGE & BUILD PIPELINE ===
-[2026-08-26 22:29:32] Found dicttool_aosp.jar (237920 bytes)
-[2026-08-26 22:29:32] Compiling DictBinaryExtractor.java...
-[2026-08-26 22:29:33] DictBinaryExtractor compiled successfully.
-[2026-08-26 22:29:33] Processing source: es.dic (835300 bytes)
-[2026-08-26 22:29:33]   -> Raw: 71199, New Unique Added: 68517 (Lexicon Pool: 68517)
-[2026-08-26 22:29:33] Processing source: es_PE.txt (715401 bytes)
-[2026-08-26 22:29:33]   -> Raw: 58445, New Unique Added: 0 (Lexicon Pool: 68517)
-[2026-08-26 22:29:33] Processing source: es_PE_wordlist.combined (1216174 bytes)
-[2026-08-26 22:29:33]   -> Raw: 56030, New Unique Added: 0 (Lexicon Pool: 68517)
-[2026-08-26 22:29:33] Processing source: main_es (1).dict (1377071 bytes)
-[2026-08-26 22:29:34]   -> Raw: 236227, New Unique Added: 234507 (Lexicon Pool: 303024)
-[2026-08-26 22:29:34] Processing source: main_es.dict (7057861 bytes)
-[2026-08-26 22:29:39]   -> Raw: 1186132, New Unique Added: 1157105 (Lexicon Pool: 1460129)
-[2026-08-26 22:29:39] Processing source: main_es_PE.dict (7057861 bytes)
-[2026-08-26 22:29:43]   -> Raw: 1186132, New Unique Added: 0 (Lexicon Pool: 1460129)
-[2026-08-26 22:29:43] Processing source: test.combined (183 bytes)
-[2026-08-26 22:29:43]   -> Raw: 5, New Unique Added: 2 (Lexicon Pool: 1460131)
-[2026-08-26 22:29:43] Processing source: test.dict (146 bytes)
-[2026-08-26 22:29:43]   -> Raw: 4, New Unique Added: 0 (Lexicon Pool: 1460131)
-[2026-08-26 22:29:43] Processing source: test1.combined (122 bytes)
-[2026-08-26 22:29:43]   -> Raw: 2, New Unique Added: 0 (Lexicon Pool: 1460131)
-[2026-08-26 22:29:43] Processing source: test1.dict (115 bytes)
-[2026-08-26 22:29:43]   -> Raw: 3, New Unique Added: 0 (Lexicon Pool: 1460131)
-[2026-08-26 22:29:43] Processing source: test2.combined (112 bytes)
-[2026-08-26 22:29:43]   -> Raw: 2, New Unique Added: 0 (Lexicon Pool: 1460131)
-[2026-08-26 22:29:43] Processing source: test2.dict (101 bytes)
-[2026-08-26 22:29:44]   -> Raw: 0, New Unique Added: 0 (Lexicon Pool: 1460131)
-[2026-08-26 22:29:44] Processing source: words_input.txt (999585 bytes)
-[2026-08-26 22:29:44]   -> Raw: 58444, New Unique Added: 0 (Lexicon Pool: 1460131)
-[2026-08-26 22:29:44] Writing intermediate main_es.combined with 1460131 words...
-[2026-08-26 22:29:45] Intermediate combined file written: 61153697 bytes
-[2026-08-26 22:29:45] Compiling binary dictionary main_es.dict from main_es.combined...
-[2026-08-26 22:29:52] makedict output:
+[2026-08-26 22:54:49] === STARTING AOSP/FUTO DICTIONARY MERGE & BUILD PIPELINE ===
+[2026-08-26 22:54:49] Found dicttool_aosp.jar (237920 bytes)
+[2026-08-26 22:54:49] Compiling DictBinaryExtractor.java...
+[2026-08-26 22:54:49] DictBinaryExtractor compiled successfully.
+[2026-08-26 22:54:49] Ingesting source independently: es.dic (835300 bytes)
+[2026-08-26 22:54:50] Ingesting source independently: es_PE.txt (715401 bytes)
+[2026-08-26 22:54:50] Ingesting source independently: es_PE_wordlist.combined (1216174 bytes)
+[2026-08-26 22:54:50] Ingesting source independently: main_es (1).dict (1377071 bytes)
+[2026-08-26 22:54:51] Ingesting source independently: main_es.dict (7293040 bytes)
+[2026-08-26 22:54:55] Ingesting source independently: main_es_PE.dict (7293040 bytes)
+[2026-08-26 22:54:58] Ingesting source independently: test.combined (183 bytes)
+[2026-08-26 22:54:58] Ingesting source independently: test.dict (146 bytes)
+[2026-08-26 22:54:58] Ingesting source independently: test1.combined (122 bytes)
+[2026-08-26 22:54:58] Ingesting source independently: test1.dict (115 bytes)
+[2026-08-26 22:54:59] Ingesting source independently: test2.combined (112 bytes)
+[2026-08-26 22:54:59] Ingesting source independently: test2.dict (101 bytes)
+[2026-08-26 22:54:59] Ingesting source independently: words_input.txt (999585 bytes)
+[2026-08-26 22:55:07] Writing intermediate main_es.combined with 1135428 words...
+[2026-08-26 22:55:08] Intermediate combined file written: 48575358 bytes
+[2026-08-26 22:55:08] Compiling binary dictionary main_es.dict from main_es.combined...
+[2026-08-26 22:55:16] makedict output:
 Flattening the tree...
-Counted nodes : 1734216
+Counted nodes : 1390589
 Computing addresses...
-Compressing the array addresses. Original size : 13065469
-(Recursively seen size : 13065469)
-Compression complete in 6 passes.
-After address compression : 8640062
+Compressing the array addresses. Original size : 10417198
+(Recursively seen size : 10417198)
+Compression complete in 5 passes.
+After address compression : 6891482
 Checking PtNode array...
 Writing file...
 Statistics:
-  Total file size 8640062
-  699748 node arrays
-  1734216 PtNodes (2.4783437 PtNodes per node)
+  Total file size 6891482
+  582201 node arrays
+  1390589 PtNodes (2.3885033 PtNodes per node)
   First terminal at 0
-  Last terminal at 8640050
+  Last terminal at 6891470
   PtNode stats : max = 64
 Done
 
-[2026-08-26 22:29:52] Binary dictionary successfully compiled: 8640190 bytes
-[2026-08-26 22:29:52] Created Peru regionalized alias: main_es_PE.dict
-[2026-08-26 22:29:52] Report generated: merge_report.md
-[2026-08-26 22:29:52] === PIPELINE COMPLETED SUCCESSFULLY IN 19.49s ===
+[2026-08-26 22:55:16] Binary dictionary successfully compiled: 6891610 bytes
+[2026-08-26 22:55:16] Created Peru regionalized alias: main_es_PE.dict
+[2026-08-26 22:55:16] Report generated: merge_report.md
+[2026-08-26 22:55:16] === PIPELINE COMPLETED SUCCESSFULLY IN 26.82s ===
